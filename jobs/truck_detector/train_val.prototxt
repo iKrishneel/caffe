@@ -1,0 +1,70 @@
+layer {
+  name: "train_data"
+  type: "Data"
+  top: "data"
+  include {
+    phase: TRAIN
+  }
+  data_param {
+    source: "/home/krishneel/digits/digits/jobs/20161127-153146-188c/train_db/features"
+    batch_size: 5
+    backend: LMDB
+  }
+}
+layer {
+  name: "train_label"
+  type: "Data"
+  top: "label"
+  include {
+    phase: TRAIN
+  }
+  data_param {
+    source: "/home/krishneel/digits/digits/jobs/20161127-153146-188c/train_db/labels"
+    batch_size: 5
+    backend: LMDB
+  }
+}
+layer {
+  name: "val_data"
+  type: "Data"
+  top: "data"
+  include {
+    phase: TEST
+  }
+  data_param {
+    source: "/home/krishneel/digits/digits/jobs/20161127-153146-188c/val_db/features"
+    batch_size: 5
+    backend: LMDB
+  }
+}
+layer {
+  name: "val_label"
+  type: "Data"
+  top: "label"
+  include {
+    phase: TEST
+  }
+  data_param {
+    source: "/home/krishneel/digits/digits/jobs/20161127-153146-188c/val_db/labels"
+    batch_size: 5
+    backend: LMDB
+  }
+}
+
+layer {
+  name: "slice-label"
+  type: "Slice"
+  bottom: "label"
+  top: "foregruond-label"
+  top: "bbox-label"
+  top: "size-label"
+  top: "obj-label"
+  top: "coverage-label"
+  slice_param {
+    slice_dim: 1
+    slice_point: 1
+    slice_point: 5
+    slice_point: 7
+    slice_point: 8
+  }
+}

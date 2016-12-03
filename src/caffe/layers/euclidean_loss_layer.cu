@@ -8,6 +8,31 @@ namespace caffe {
 template <typename Dtype>
 void EuclideanLossLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
+
+    for (int i = 0; i < bottom.size(); i++) {
+       Dtype* top_data1 = bottom[i]->mutable_cpu_data();
+       std::cout << bottom.size()  << "\t" << bottom[i]->num()<< "\n";
+       std::cout << bottom.size()  << "\t" << bottom[i]->height()<< "\n";
+       std::cout << bottom.size()  << "\t" << bottom[i]->width()<< "\n";
+       std::cout << bottom.size()  << "\t" << bottom[i]->channels()<< "\n";
+
+       std::cout << "PRINTING " << i  << " " << "\n";
+       int index = -1;
+       for (int k = 0; k < bottom[i]->channels(); k++) {
+          for (int y = 0; y < bottom[i]->height(); y++) {
+             int t = 0;
+             for (int x = 0; x < bottom[i]->width(); x++) {
+                index = y + (x * bottom[i]->height()) +
+                   (k * bottom[i]->width() * bottom[i]->height());
+                std::cout << top_data1[index] << " ";
+                t++;
+             }
+          }
+          std::cout << "\nNext Channel:  " << index  << "\n";
+       }
+       std::cout  << "\n\n";
+    }
+   
   int count = bottom[0]->count();
   caffe_gpu_sub(
       count,

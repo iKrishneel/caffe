@@ -1,0 +1,122 @@
+I1127 16:47:26.822469 22736 upgrade_proto.cpp:1076] Attempting to upgrade input file specified using deprecated 'solver_type' field (enum)': jobs/truck_detector/solver.prototxt
+I1127 16:47:26.822593 22736 upgrade_proto.cpp:1083] Successfully upgraded file specified using deprecated 'solver_type' field (enum) to 'type' field (string).
+W1127 16:47:26.822598 22736 upgrade_proto.cpp:1085] Note that future Caffe releases will only support 'type' field (string) for a solver's type.
+I1127 16:47:26.822674 22736 caffe.cpp:217] Using GPUs 0
+I1127 16:47:26.825803 22736 caffe.cpp:222] GPU 0: Quadro M2000M
+I1127 16:47:26.982475 22736 solver.cpp:48] Initializing solver from parameters: 
+test_iter: 11
+test_interval: 100
+base_lr: 0.0001
+display: 13
+max_iter: 10000
+lr_policy: "step"
+gamma: 0.1
+momentum: 0.9
+weight_decay: 0.0001
+stepsize: 1089
+snapshot: 1000
+snapshot_prefix: "snapshot"
+solver_mode: GPU
+device_id: 0
+net: "jobs/truck_detector/train_val.prototxt"
+train_state {
+  level: 0
+  stage: ""
+}
+iter_size: 10
+type: "SGD"
+I1127 16:47:26.982607 22736 solver.cpp:91] Creating training net from net file: jobs/truck_detector/train_val.prototxt
+I1127 16:47:26.982795 22736 net.cpp:322] The NetState phase (0) differed from the phase (1) specified by a rule in layer val_data
+I1127 16:47:26.982802 22736 net.cpp:322] The NetState phase (0) differed from the phase (1) specified by a rule in layer val_label
+I1127 16:47:26.982854 22736 net.cpp:58] Initializing net from parameters: 
+state {
+  phase: TRAIN
+  level: 0
+  stage: ""
+}
+layer {
+  name: "train_data"
+  type: "Data"
+  top: "data"
+  include {
+    phase: TRAIN
+  }
+  data_param {
+    source: "/home/krishneel/digits/digits/jobs/20161127-153146-188c/train_db/features"
+    batch_size: 5
+    backend: LMDB
+  }
+}
+layer {
+  name: "train_label"
+  type: "Data"
+  top: "label"
+  include {
+    phase: TRAIN
+  }
+  data_param {
+    source: "/home/krishneel/digits/digits/jobs/20161127-153146-188c/train_db/labels"
+    batch_size: 5
+    backend: LMDB
+  }
+}
+layer {
+  name: "slice-label"
+  type: "Slice"
+  bottom: "label"
+  top: "foreground-label"
+  top: "bbox-label"
+  top: "size-label"
+  top: "obj-label"
+  top: "coverage-label"
+  slice_param {
+    slice_dim: 1
+    slice_point: 1
+    slice_point: 5
+    slice_point: 7
+    slice_point: 8
+  }
+}
+I1127 16:47:26.982949 22736 layer_factory.hpp:77] Creating layer train_data
+I1127 16:47:26.983350 22736 net.cpp:100] Creating Layer train_data
+I1127 16:47:26.983358 22736 net.cpp:408] train_data -> data
+I1127 16:47:26.984344 22740 db_lmdb.cpp:35] Opened lmdb /home/krishneel/digits/digits/jobs/20161127-153146-188c/train_db/features
+I1127 16:47:27.005561 22736 data_layer.cpp:41] output data size: 5,3,610,610
+I1127 16:47:27.027838 22736 net.cpp:150] Setting up train_data
+I1127 16:47:27.027875 22736 net.cpp:157] Top shape: 5 3 610 610 (5581500)
+I1127 16:47:27.027880 22736 net.cpp:165] Memory required for data: 22326000
+I1127 16:47:27.027894 22736 layer_factory.hpp:77] Creating layer train_label
+I1127 16:47:27.027982 22736 net.cpp:100] Creating Layer train_label
+I1127 16:47:27.027990 22736 net.cpp:408] train_label -> label
+I1127 16:47:27.030539 22742 db_lmdb.cpp:35] Opened lmdb /home/krishneel/digits/digits/jobs/20161127-153146-188c/train_db/labels
+I1127 16:47:27.030738 22736 data_layer.cpp:41] output data size: 5,1,2,16
+I1127 16:47:27.031013 22736 net.cpp:150] Setting up train_label
+I1127 16:47:27.031023 22736 net.cpp:157] Top shape: 5 1 2 16 (160)
+I1127 16:47:27.031028 22736 net.cpp:165] Memory required for data: 22326640
+I1127 16:47:27.031056 22736 layer_factory.hpp:77] Creating layer slice-label
+I1127 16:47:27.031091 22736 net.cpp:100] Creating Layer slice-label
+I1127 16:47:27.031100 22736 net.cpp:434] slice-label <- label
+I1127 16:47:27.031167 22736 net.cpp:408] slice-label -> foreground-label
+I1127 16:47:27.031218 22736 net.cpp:408] slice-label -> bbox-label
+I1127 16:47:27.031226 22736 net.cpp:408] slice-label -> size-label
+I1127 16:47:27.031349 22736 net.cpp:408] slice-label -> obj-label
+I1127 16:47:27.031376 22736 net.cpp:408] slice-label -> coverage-label
+F1127 16:47:27.031396 22736 slice_layer.cpp:44] Check failed: top.size() <= bottom_slice_axis (5 vs. 1) 
+*** Check failure stack trace: ***
+    @     0x7f0655b6adaa  (unknown)
+    @     0x7f0655b6ace4  (unknown)
+    @     0x7f0655b6a6e6  (unknown)
+    @     0x7f0655b6d687  (unknown)
+    @     0x7f0656127c47  caffe::SliceLayer<>::Reshape()
+    @     0x7f0656220ae5  caffe::Net<>::Init()
+    @     0x7f0656221975  caffe::Net<>::Net()
+    @     0x7f065624aaca  caffe::Solver<>::InitTrainNet()
+    @     0x7f065624bcdc  caffe::Solver<>::Init()
+    @     0x7f065624c00a  caffe::Solver<>::Solver()
+    @     0x7f06562640f3  caffe::Creator_SGDSolver<>()
+    @           0x411fe6  caffe::SolverRegistry<>::CreateSolver()
+    @           0x40af62  train()
+    @           0x40899c  main
+    @     0x7f065436bf45  (unknown)
+    @           0x4092a3  (unknown)
+    @              (nil)  (unknown)
