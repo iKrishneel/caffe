@@ -27,6 +27,7 @@ void EuclideanLossLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
                 std::cout << top_data1[index] << " ";
                 t++;
              }
+             std::cout  << "\n";
           }
           std::cout << "\nNext Channel:  " << index  << "\n";
        }
