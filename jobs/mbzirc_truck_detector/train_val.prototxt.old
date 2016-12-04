@@ -8,19 +8,22 @@ layer {
   top: "data"
   data_param {
     backend: LMDB
-    source: "examples/kitti/kitti_train_images.lmdb"
-    batch_size: 10
+    ## source: "/home/krishneel/digits/digits/jobs/20161115-230826-c442/train_db/features"
+    source: "/home/krishneel/digits/digits/jobs/20161115-230826-c442/val_db/features"	
+    batch_size: 3
   }
-  include: { phase: TRAIN }
+  include: { 
+    phase: TRAIN 
+  }
 }
 layer {
   name: "train_label"
-  type: "Data"
+  type: "HDF5Data"
   top: "label"
-  data_param {
-    backend: LMDB
-    source: "examples/kitti/kitti_train_labels.lmdb"
-    batch_size: 10
+  hdf5_data_param {
+    ## source: "/home/krishneel/Desktop/truck_datasets/train/box_labels.txt"
+    source: "/home/krishneel/Desktop/truck_datasets/val/box_labels.txt"
+    batch_size: 3
   }
   include: { phase: TRAIN }
 }
@@ -30,196 +33,23 @@ layer {
   top: "data"
   data_param {
     backend: LMDB
-    source: "examples/kitti/kitti_test_images.lmdb"
-    batch_size: 6
+    source: "/home/krishneel/digits/digits/jobs/20161115-230826-c442/val_db/features"
+    batch_size: 2
   }
-  include: { phase: TEST stage: "val" }
+  include: { phase: TEST}
 }
 layer {
   name: "val_label"
-  type: "Data"
+  type: "HDF5Data"
   top: "label"
-  data_param {
-    backend: LMDB
-    source: "examples/kitti/kitti_test_labels.lmdb"
-    batch_size: 6
+  hdf5_data_param {
+    source: "/home/krishneel/Desktop/truck_datasets/val/box_labels.txt"
+    batch_size: 2
   }
-  include: { phase: TEST stage: "val" }
-}
-layer {
-  name: "deploy_data"
-  type: "Input"
-  top: "data"
-  input_param {
-    shape {
-      dim: 1
-      dim: 3
-      dim: 384
-      dim: 1248
-    }
-  }
-  include: { phase: TEST not_stage: "val" }
+
+  include: { phase: TEST}
 }
 
-# Data transformation layers
-layer {
-  name: "train_transform"
-  type: "DetectNetTransformation"
-  bottom: "data"
-  bottom: "label"
-  top: "transformed_data"
-  top: "transformed_label"
-  detectnet_groundtruth_param: {
-    stride: 16
-    scale_cvg: 0.4
-    gridbox_type: GRIDBOX_MIN
-    coverage_type: RECTANGULAR
-    min_cvg_len: 20
-    obj_norm: true
-    image_size_x: 1248
-    image_size_y: 384
-    crop_bboxes: true
-    object_class: { src: 1 dst: 0} # obj class 1 -> cvg index 0
-  }
-   detectnet_augmentation_param: {
-    crop_prob: 1
-    shift_x: 32
-    shift_y: 32
-    flip_prob: 0.5
-    rotation_prob: 0
-    max_rotate_degree: 5
-    scale_prob: 0.4
-    scale_min: 0.8
-    scale_max: 1.2
-    hue_rotation_prob: 0.8
-    hue_rotation: 30
-    desaturation_prob: 0.8
-    desaturation_max: 0.8
-  }
-  transform_param: {
-    mean_value: 127
-  }
-  include: { phase: TRAIN }
-}
-layer {
-  name: "val_transform"
-  type: "DetectNetTransformation"
-  bottom: "data"
-  bottom: "label"
-  top: "transformed_data"
-  top: "transformed_label"
-  detectnet_groundtruth_param: {
-    stride: 16
-    scale_cvg: 0.4
-    gridbox_type: GRIDBOX_MIN
-    coverage_type: RECTANGULAR
-    min_cvg_len: 20
-    obj_norm: true
-    image_size_x: 1248
-    image_size_y: 384
-    crop_bboxes: false
-    object_class: { src: 1 dst: 0} # obj class 1 -> cvg index 0
-  }
-  transform_param: {
-    mean_value: 127
-  }
-  include: { phase: TEST stage: "val" }
-}
-layer {
-  name: "deploy_transform"
-  type: "Power"
-  bottom: "data"
-  top: "transformed_data"
-  power_param {
-    shift: -127
-  }
-  include: { phase: TEST not_stage: "val" }
-}
-
-# Label conversion layers
-layer {
-  name: "slice-label"
-  type: "Slice"
-  bottom: "transformed_label"
-  top: "foreground-label"
-  top: "bbox-label"
-  top: "size-label"
-  top: "obj-label"
-  top: "coverage-label"
-  slice_param {
-    slice_dim: 1
-    slice_point: 1
-    slice_point: 5
-    slice_point: 7
-    slice_point: 8
-  }
-  include { phase: TRAIN }
-  include { phase: TEST stage: "val" }
-}
-layer {
-  name: "coverage-block"
-  type: "Concat"
-  bottom: "foreground-label"
-  bottom: "foreground-label"
-  bottom: "foreground-label"
-  bottom: "foreground-label"
-  top: "coverage-block"
-  concat_param {
-    concat_dim: 1
-  }
-  include { phase: TRAIN }
-  include { phase: TEST stage: "val" }
-}
-layer {
-  name: "size-block"
-  type: "Concat"
-  bottom: "size-label"
-  bottom: "size-label"
-  top: "size-block"
-  concat_param {
-    concat_dim: 1
-  }
-  include { phase: TRAIN }
-  include { phase: TEST stage: "val" }
-}
-layer {
-  name: "obj-block"
-  type: "Concat"
-  bottom: "obj-label"
-  bottom: "obj-label"
-  bottom: "obj-label"
-  bottom: "obj-label"
-  top: "obj-block"
-  concat_param {
-    concat_dim: 1
-  }
-  include { phase: TRAIN }
-  include { phase: TEST stage: "val" }
-}
-layer {
-  name: "bb-label-norm"
-  type: "Eltwise"
-  bottom: "bbox-label"
-  bottom: "size-block"
-  top: "bbox-label-norm"
-  eltwise_param {
-    operation: PROD
-  }
-  include { phase: TRAIN }
-  include { phase: TEST stage: "val" }
-}
-layer {
-  name: "bb-obj-norm"
-  type: "Eltwise"
-  bottom: "bbox-label-norm"
-  bottom: "obj-block"
-  top: "bbox-obj-label-norm"
-  eltwise_param {
-    operation: PROD
-  }
-  include { phase: TRAIN }
-  include { phase: TEST stage: "val" }
-}
 
 ######################################################################
 # Start of convolutional network
@@ -228,7 +58,7 @@ layer {
 layer {
   name: "conv1/7x7_s2"
   type: "Convolution"
-  bottom: "transformed_data"
+  bottom: "data"
   top: "conv1/7x7_s2"
   param {
     lr_mult: 1
@@ -2401,149 +2231,26 @@ layer {
   bottom: "cvg/classifier"
   top: "coverage"
 }
-layer {
-  name: "bbox/regressor"
-  type: "Convolution"
-  bottom: "pool5/drop_s1"
-  top: "bboxes"
-  param {
-    lr_mult: 1
-    decay_mult: 1
-  }
-  param {
-    lr_mult: 2
-    decay_mult: 0
-  }
-  convolution_param {
-    num_output: 4
-    kernel_size: 1
-    weight_filler {
-      type: "xavier"
-      std: 0.03
-    }
-    bias_filler {
-      type: "constant"
-      value: 0.
-    }
-  }
-}
 
 ######################################################################
 # End of convolutional network
 ######################################################################
 
-# Convert bboxes
 layer {
-  name: "bbox_mask"
-  type: "Eltwise"
-  bottom: "bboxes"
-  bottom: "coverage-block"
-
-  top: "bboxes-masked"
-  eltwise_param {
-    operation: PROD
-  }
-  include { phase: TRAIN }
-  include { phase: TEST stage: "val" }
-}
-layer {
-  name: "bbox-norm"
-  type: "Eltwise"
-  bottom: "bboxes-masked"
-  bottom: "size-block"
-  top: "bboxes-masked-norm"
-  eltwise_param {
-    operation: PROD
-  }
-  include { phase: TRAIN }
-  include { phase: TEST stage: "val" }
-}
-layer {
-  name: "bbox-obj-norm"
-  type: "Eltwise"
-  bottom: "bboxes-masked-norm"
-  bottom: "obj-block"
-  top: "bboxes-obj-masked-norm"
-  eltwise_param {
-    operation: PROD
-  }
-  include { phase: TRAIN }
-  include { phase: TEST stage: "val" }
+  name: "reshape"
+  type: "Reshape"
+  bottom: "label"
+  top: "label_reshape"
+  reshape_param {shape: { dim: 0 dim: 1 dim:38 dim:38 } }
 }
 
-# Loss layers
-layer {
-  name: "bbox_loss"
-  type: "L1Loss"
-  bottom: "bboxes-obj-masked-norm"
-  bottom: "bbox-obj-label-norm"
-  top: "loss_bbox"
-  loss_weight: 2
-  include { phase: TRAIN }
-  include { phase: TEST stage: "val" }
-}
+
 layer {
   name: "coverage_loss"
   type: "EuclideanLoss"
   bottom: "coverage"
-  bottom: "coverage-label"
+  bottom: "label_reshape"
   top: "loss_coverage"
   include { phase: TRAIN }
-  include { phase: TEST stage: "val" }
-}
-
-# Cluster bboxes
-layer {
-    type: 'Python'
-    name: 'cluster'
-    bottom: 'coverage'
-    bottom: 'bboxes'
-    top: 'bbox-list'
-    python_param {
-        module: 'caffe.layers.detectnet.clustering'
-        layer: 'ClusterDetections'
-        param_str : '1248, 352, 16, 0.6, 3, 0.02, 22, 1'
-    }
-    include: { phase: TEST }
-}
-
-# Calculate mean average precision
-layer {
-  type: 'Python'
-  name: 'cluster_gt'
-  bottom: 'coverage-label'
-  bottom: 'bbox-label'
-  top: 'bbox-list-label'
-  python_param {
-      module: 'caffe.layers.detectnet.clustering'
-      layer: 'ClusterGroundtruth'
-      param_str : '1248, 352, 16, 1'
-  }
-  include: { phase: TEST stage: "val" }
-}
-layer {
-    type: 'Python'
-    name: 'score'
-    bottom: 'bbox-list-label'
-    bottom: 'bbox-list'
-    top: 'bbox-list-scored'
-    python_param {
-        module: 'caffe.layers.detectnet.mean_ap'
-        layer: 'ScoreDetections'
-    }
-    include: { phase: TEST stage: "val" }
-}
-layer {
-    type: 'Python'
-    name: 'mAP'
-    bottom: 'bbox-list-scored'
-    top: 'mAP'
-    top: 'precision'
-    top: 'recall'
-    python_param {
-        module: 'caffe.layers.detectnet.mean_ap'
-        layer: 'mAP'
-        param_str : '1248, 352, 16'
-    }
-    include: { phase: TEST stage: "val" }
+  include { phase: TEST}
 }
