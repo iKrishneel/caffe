@@ -1,7 +1,7 @@
 net: "jobs/mbzirc_truck_detector/train_val.prototxt"	
-#test_iter: 25
-#test_interval: 250
-base_lr: 0.01
+test_iter: 25
+test_interval: 250
+base_lr: 0.001
 display: 20
 max_iter: 10000
 lr_policy: "fixed"
