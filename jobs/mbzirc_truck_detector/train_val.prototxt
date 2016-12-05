@@ -17,7 +17,7 @@ layer {
   image_data_param {
     root_folder: "/home/krishneel/Desktop/truck/train/images/"
     source: "/home/krishneel/Desktop/truck/train/train.txt"	
-    batch_size: 2
+    batch_size: 10
   }
   include: { 
     phase: TRAIN 
@@ -29,7 +29,7 @@ layer {
   top: "label"
   hdf5_data_param {
     source: "/home/krishneel/Desktop/truck/train/box_labels.txt"
-    batch_size: 2
+    batch_size: 10
   }
   include: { phase: TRAIN }
 }
@@ -41,7 +41,7 @@ layer {
   image_data_param {
     root_folder: "/home/krishneel/Desktop/truck/val/images/"
     source: "/home/krishneel/Desktop/truck/val/train.txt"
-    batch_size: 2
+    batch_size: 5
   }
   include: { phase: TEST}
 }
@@ -51,18 +51,18 @@ layer {
   top: "label"
   hdf5_data_param {
     source: "/home/krishneel/Desktop/truck/val/box_labels.txt"
-    batch_size: 2
+    batch_size: 5
   }
   include: { phase: TEST}
 }
 
 
-layer {
-  name: "normalize_data"
-  type: "BatchNorm"
-  top: "data"
-  bottom: "data"
-}
+# layer {
+#   name: "normalize_data"
+#   type: "BatchNorm"
+#   top: "data"
+#   bottom: "data"
+# }
 
 
 ######################################################################
@@ -2248,6 +2248,7 @@ layer {
   top: "coverage"
 }
 
+
 ######################################################################
 # End of convolutional network
 ######################################################################
@@ -2265,17 +2266,18 @@ layer {
   type: "EuclideanLoss"
   bottom: "coverage"
   bottom: "label_reshape"
-  top: "loss_testing"
-  include { phase: TRAIN }
-}
-
-layer {
-  name: "coverage_loss"
-  type: "EuclideanLoss"
-  ## bottom: "coverage"
-  bottom: "label_reshape"
-  bottom: "label_reshape"
   top: "loss_coverage"
   include { phase: TRAIN }
-  #include { phase: TEST}
+  include { phase: TEST }
 }
+
+# layer {
+#   name: "loss"
+#   type: "EuclideanLoss"
+#   bottom: "cvg/classifier"
+#   bottom: "label_reshape"
+#   top: "loss_test"
+#   include { phase: TRAIN }
+#   #include { phase: TEST}
+# }
+

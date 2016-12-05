@@ -1,7 +1,7 @@
 net: "jobs/mbzirc_truck_detector/train_val.prototxt"	
 test_iter: 25
 test_interval: 250
-base_lr: 0.001
+base_lr: 0.0001
 display: 20
 max_iter: 10000
 lr_policy: "fixed"
@@ -12,5 +12,6 @@ stepsize: 2713
 snapshot: 274
 snapshot_prefix: "jobs/mbzirc_truck_detector/snapshot"
 solver_mode: GPU
-type: "Adam"
+type: "SGD"
 iter_size: 1
+debug_info: true
