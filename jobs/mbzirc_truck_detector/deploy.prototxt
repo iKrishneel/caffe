@@ -7,8 +7,6 @@ input_shape {
   dim: 640
 }
 
-
-
 ######################################################################
 # Start of convolutional network
 ######################################################################
@@ -2177,7 +2175,7 @@ layer {
     kernel_size: 1
     weight_filler {
       type: "xavier"
-      std: 0.03
+      std: 0.3
     }
     bias_filler {
       type: "constant"
