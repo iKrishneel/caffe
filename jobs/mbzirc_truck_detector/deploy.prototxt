@@ -1,68 +1,12 @@
-# DetectNet network
 
-# Data/Input layers
-name: "DetectNet"
-layer {
-  name: "train_data"
-  type: "ImageData"
-  top: "data"
-  top: "dummpy_label"
-  # transform_param {
-  #   #crop_size: 310
-  #   mean_value: 104
-  #   mean_value: 117
-  #   mean_value: 123
-  # }  
-
-  image_data_param {
-    root_folder: "/home/krishneel/Desktop/truck/train/images/"
-    source: "/home/krishneel/Desktop/truck/train/train.txt"	
-    batch_size: 10
-  }
-  include: { 
-    phase: TRAIN 
-  }
-}
-layer {
-  name: "train_label"
-  type: "HDF5Data"
-  top: "label"
-  hdf5_data_param {
-    source: "/home/krishneel/Desktop/truck/train/box_labels.txt"
-    batch_size: 10
-  }
-  include: { phase: TRAIN }
-}
-layer {
-  name: "val_data"
-  type: "ImageData"
-  top: "data"
-  top: "dummpy_label"
-  image_data_param {
-    root_folder: "/home/krishneel/Desktop/truck/val/images/"
-    source: "/home/krishneel/Desktop/truck/val/train.txt"
-    batch_size: 10
-  }
-  include: { phase: TEST}
-}
-layer {
-  name: "val_label"
-  type: "HDF5Data"
-  top: "label"
-  hdf5_data_param {
-    source: "/home/krishneel/Desktop/truck/val/box_labels.txt"
-    batch_size: 10
-  }
-  include: { phase: TEST}
+input: "data"
+input_shape {
+  dim: 1
+  dim: 3
+  dim: 360
+  dim: 640
 }
 
-
-# layer {
-#   name: "normalize_data"
-#   type: "BatchNorm"
-#   top: "data"
-#   bottom: "data"
-# }
 
 
 ######################################################################
@@ -2233,7 +2177,7 @@ layer {
     kernel_size: 1
     weight_filler {
       type: "xavier"
-      std: 0.3
+      std: 0.03
     }
     bias_filler {
       type: "constant"
@@ -2252,23 +2196,3 @@ layer {
 ######################################################################
 # End of convolutional network
 ######################################################################
-
-
-layer {
-  name: "reshape"
-  type: "Reshape"
-  bottom: "label"
-  top: "label_reshape"
-  reshape_param {shape: { dim: 0 dim: 1 dim:22 dim:40} }
-}
-
-layer {
-  name: "coverage_loss"
-  type: "EuclideanLoss"
-  bottom: "coverage"
-  bottom: "label_reshape"
-  ##  bottom: "label"
-  top: "loss_coverage"
-  include { phase: TRAIN }
-  include { phase: TEST }
-}
