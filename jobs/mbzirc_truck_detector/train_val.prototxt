@@ -2253,12 +2253,13 @@ layer {
 # End of convolutional network
 ######################################################################
 
+
 layer {
   name: "reshape"
   type: "Reshape"
   bottom: "label"
   top: "label_reshape"
-  reshape_param {shape: { dim: 0 dim: 1 dim:38 dim:38} }
+  reshape_param {shape: { dim: 0 dim: 1 dim:22 dim:40} }
 }
 
 layer {
@@ -2266,6 +2267,7 @@ layer {
   type: "EuclideanLoss"
   bottom: "coverage"
   bottom: "label_reshape"
+  ##  bottom: "label"
   top: "loss_coverage"
   include { phase: TRAIN }
   include { phase: TEST }
