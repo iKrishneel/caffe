@@ -17,7 +17,7 @@ layer {
   image_data_param {
     root_folder: "/home/krishneel/Desktop/truck/train/images/"
     source: "/home/krishneel/Desktop/truck/train/train.txt"	
-    batch_size: 10
+    batch_size: 15
   }
   include: { 
     phase: TRAIN 
@@ -29,7 +29,7 @@ layer {
   top: "label"
   hdf5_data_param {
     source: "/home/krishneel/Desktop/truck/train/box_labels.txt"
-    batch_size: 10
+    batch_size: 15
   }
   include: { phase: TRAIN }
 }
@@ -41,7 +41,7 @@ layer {
   image_data_param {
     root_folder: "/home/krishneel/Desktop/truck/val/images/"
     source: "/home/krishneel/Desktop/truck/val/train.txt"
-    batch_size: 10
+    batch_size: 15
   }
   include: { phase: TEST}
 }
@@ -51,18 +51,10 @@ layer {
   top: "label"
   hdf5_data_param {
     source: "/home/krishneel/Desktop/truck/val/box_labels.txt"
-    batch_size: 10
+    batch_size: 15
   }
   include: { phase: TEST}
 }
-
-
-# layer {
-#   name: "normalize_data"
-#   type: "BatchNorm"
-#   top: "data"
-#   bottom: "data"
-# }
 
 
 ######################################################################
@@ -2221,11 +2213,11 @@ layer {
   bottom: "pool5/drop_s1"
   top: "cvg/classifier"
   param {
-    lr_mult: 1.0
+    lr_mult: 10.0
     decay_mult: 1.0
   }
   param {
-    lr_mult: 2.0
+    lr_mult: 20.0
     decay_mult: 0.0
   }
   convolution_param {
@@ -2258,7 +2250,7 @@ layer {
   type: "Reshape"
   bottom: "label"
   top: "label_reshape"
-  reshape_param {shape: { dim: 0 dim: 1 dim:22 dim:40} }
+  reshape_param {shape: { dim: 0 dim: 1 dim:28 dim:28} }
 }
 
 layer {
