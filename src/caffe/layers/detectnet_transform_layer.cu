@@ -348,6 +348,33 @@ template <typename Dtype>
 void DetectNetTransformationLayer<Dtype>::Forward_gpu(
     const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
+
+
+    for (int i = 1; i < bottom.size(); i++) {
+       Dtype* top_data1 = bottom[i]->mutable_cpu_data();
+       std::cout << bottom.size()  << "\t" << bottom[i]->num()<< "\n";
+       std::cout << bottom.size()  << "\t" << bottom[i]->height()<< "\n";
+       std::cout << bottom.size()  << "\t" << bottom[i]->width()<< "\n";
+       std::cout << bottom.size()  << "\t" << bottom[i]->channels()<< "\n";
+     
+     std::cout << "PRINTING (DTL) " << i  << " " << "\n";
+     int index = -1;
+     for (int k = 0; k < bottom[i]->channels(); k++) {
+        for (int y = 0; y < bottom[i]->height(); y++) {
+           for (int x = 0; x < bottom[i]->width(); x++) {
+              index = x + (y * bottom[i]->width()) +
+                 (k * bottom[i]->width() * bottom[i]->height());
+              std::cout << top_data1[index]  << " ";
+           }
+           std::cout  << "\n";
+        }
+        std::cout << "\nNext Channel:  " << index  << "\n";
+     }
+     std::cout  << "\n\n";
+  }
+
+     
+   
   const Dtype* bottom_data = bottom[0]->gpu_data();
   Dtype* top_data = top[0]->mutable_gpu_data();
   AugmentSelection* aug_data = reinterpret_cast<AugmentSelection*>(
@@ -413,6 +440,8 @@ void DetectNetTransformationLayer<Dtype>::Forward_gpu(
     CAFFE_CUDA_NUM_THREADS>>>(tmp_data, bottom_shape, aug_data,
         top_data, top_shape);
 
+
+  
   // Use CPU to transform labels
   const vector<vector<BboxLabel> > list_list_bboxes = blobToLabels(*bottom[1]);
   for (size_t i = 0; i < bottom[1]->num(); i++) {
@@ -422,6 +451,12 @@ void DetectNetTransformationLayer<Dtype>::Forward_gpu(
       ];
     transform_label_cpu(list_bboxes, output_label, augmentations[i],
         cv::Size(bottom_shape.x, bottom_shape.y));
+
+    // std::cout << "LABELS"  << "\n";
+    // for (int k = 0; k < 16; k++) {
+    //    std::cout << output_label[i]  << " ";
+    // }
+    // std::cout <<"\n-------------"  << "\n";
   }
 }
 

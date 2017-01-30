@@ -34,6 +34,7 @@ void SliceLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   const bool kForward = true;
   for (int i = 0; i < top.size(); ++i) {
     Dtype* top_data = top[i]->mutable_gpu_data();
+    
     const int top_slice_axis = top[i]->shape(slice_axis_);
     const int top_slice_size = top_slice_axis * slice_size_;
     const int nthreads = top_slice_size * num_slices_;
@@ -42,6 +43,32 @@ void SliceLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
         nthreads, bottom_data, kForward, num_slices_, slice_size_,
         bottom_slice_axis, top_slice_axis, offset_slice_axis, top_data);
     offset_slice_axis += top_slice_axis;
+  }
+
+  
+  for (int i = 0; i < top.size(); i++) {
+     Dtype* top_data1 = top[i]->mutable_cpu_data();
+     std::cout << "PRINTING (SLICE) " << i  << " " << "\n";
+     std::cout << top[i]->channels()  << "\n";
+
+     int index = -1;
+     for (int k = 0; k < top[i]->channels(); k++) {
+        for (int y = 0; y < top[i]->height(); y++) {
+           for (int x = 0; x < top[i]->width(); x++) {
+              index = x + (y * top[i]->width()) +
+                 (k * top[i]->width() * top[i]->height());
+              std::cout << top_data1[index]  << " ";
+           }
+        }
+        std::cout << "Next Channel:  " << index  << "\n";
+     }
+
+     std::cout  << "\n\n";
+     
+     // for (int k = 0; k < 38*38; k++) {
+     //    std::cout << top_data1[i]  << " ";
+     // }
+     // std::cout << "\nDone....."  << "\n";
   }
 }
 

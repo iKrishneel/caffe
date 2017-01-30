@@ -205,10 +205,11 @@ DetectNetTransformationLayer<Dtype>::blobToLabels(
   for (size_t iLabel = 0; iLabel != labels.num(); ++iLabel) {
     const Dtype* source = &labels.cpu_data()[
         labels.offset(iLabel, 0, 0, 0)
-    ];
-
+       ];
+    
     size_t numOfBbox = static_cast<size_t>(source[0]);
     size_t bboxLen = static_cast<size_t>(source[1]);
+    
     CHECK_EQ(bboxLen, sizeof(BboxLabel) / sizeof(Dtype));
     CHECK_LE(numOfBbox, labels.height());
     // exclude header
@@ -218,7 +219,7 @@ DetectNetTransformationLayer<Dtype>::blobToLabels(
         reinterpret_cast<const BboxLabel*>(source),
         reinterpret_cast<const BboxLabel*>(source + bboxLen * numOfBbox)));
   }
-
+  
   return result;
 }
 
@@ -311,6 +312,9 @@ void DetectNetTransformationLayer<Dtype>::Forward_cpu(
     const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top
 ) {
+
+   std::cout << "Forwarding...."  << "\n";
+   
   // verify image parameters:
   const int image_count = bottom[0]->num();
   // verify label parameters:
@@ -326,7 +330,18 @@ void DetectNetTransformationLayer<Dtype>::Forward_cpu(
   for (size_t iImage = 0; iImage != inputImages.size(); ++iImage) {
     const Mat3v& inputImage = inputImages[iImage];
     const vector<BboxLabel >& inputLabel = labels[iImage];
+    
+    
+    // std::cout << "\nBox Info-----------------"  << "\n";
+    // for (int i = 0; i < inputLabel.size(); i++) {
+    //    std::cout << inputLabel[i].bbox.x << " "
+    //              << inputLabel[i].bbox.y  << " ";
+    //    std::cout << inputLabel[i].bbox.width << " "
+    //              << inputLabel[i].bbox.height  << "\n";
+    // }
+    // std::cout << "--------------------------------------"  << "\n";
 
+    
     Mat3v& outputImage = outputImages[iImage];
     Dtype* outputLabel = &outputLabels.mutable_cpu_data()[
         outputLabels.offset(iImage, 0, 0, 0)
@@ -336,6 +351,15 @@ void DetectNetTransformationLayer<Dtype>::Forward_cpu(
 
     outputImage = transform_image_cpu(inputImage, as);
     transform_label_cpu(inputLabel, outputLabel, as, inputImage.size());
+
+    
+    // Dtype *test = top[1]->mutable_cpu_data();
+    // for (int i = 0; i < 16; i++) {
+    //    std::cout << test[i]  << " ";
+    // }
+    // std::cout << "DONE-----------------------"  << "\n";
+
+    
   }
   // emplace images in output image blob:
   matsToBlob(outputImages, top[0]);
@@ -462,7 +486,21 @@ void DetectNetTransformationLayer<Dtype>::transform_label_cpu(
   }
   bboxes = crop_label_cpu(bboxes, as.crop_offset);
 
+  // std::cout << "\nBox Info-----------------"  << "\n";
+  // for (int i = 0; i < bboxes.size(); i++) {
+  //    std::cout << bboxes[i].bbox.x << " " << bboxes[i].bbox.y  << " ";
+  //    std::cout << bboxes[i].bbox.width << " " << bboxes[i].bbox.height  << "\n";
+  // }
+  // std::cout << "--------------------------------------"  << "\n";
+  
   coverage_->generate(transformed_label, bboxes);
+
+  // std::cout << "\nAFTER Box Info-----------------"  << "\n";
+  // for (int i = 0; i < bboxes.size(); i++) {
+  //    std::cout << bboxes[i].bbox.x << " " << bboxes[i].bbox.y  << " ";
+  //    std::cout << bboxes[i].bbox.width << " " << bboxes[i].bbox.height  << "\n";
+  // }
+  // std::cout << "--------------------------------------"  << "\n";
 }
 
 

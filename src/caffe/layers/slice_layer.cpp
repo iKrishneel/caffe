@@ -21,6 +21,15 @@ void SliceLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
 template <typename Dtype>
 void SliceLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
+
+   /*
+    Dtype* b_data = bottom[0]->mutable_cpu_data();
+    std::cout << "PRINTING"  << "\n";
+    for (int i = 0; i < 16; i++) {
+       std::cout << b_data[0]  << "\n";
+   }
+   */
+   
   const int num_axes = bottom[0]->num_axes();
   const SliceParameter& slice_param = this->layer_param_.slice_param();
   if (slice_param.has_slice_dim()) {
@@ -51,7 +60,7 @@ void SliceLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
     }
     slices.push_back(bottom_slice_axis - prev);
     for (int i = 0; i < top.size(); ++i) {
-      top_shape[slice_axis_] = slices[i];
+       top_shape[slice_axis_] = slices[i];
       top[i]->Reshape(top_shape);
       count += top[i]->count();
     }
@@ -75,12 +84,14 @@ void SliceLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
 template <typename Dtype>
 void SliceLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
+
   if (top.size() == 1) { return; }
   int offset_slice_axis = 0;
   const Dtype* bottom_data = bottom[0]->cpu_data();
   const int bottom_slice_axis = bottom[0]->shape(slice_axis_);
   for (int i = 0; i < top.size(); ++i) {
     Dtype* top_data = top[i]->mutable_cpu_data();
+    
     const int top_slice_axis = top[i]->shape(slice_axis_);
     for (int n = 0; n < num_slices_; ++n) {
       const int top_offset = n * top_slice_axis * slice_size_;
@@ -89,6 +100,14 @@ void SliceLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
       caffe_copy(top_slice_axis * slice_size_,
           bottom_data + bottom_offset, top_data + top_offset);
     }
+
+    
+    // std::cout << "\nPRINTING SLICE"  << "\n";
+    // for (int k = 0; k < 16; k++) {
+    //    std::cout << top_data[i]  << "\n";
+    // }
+    // std::cout << "Done....."  << "\n";
+    
     offset_slice_axis += top_slice_axis;
   }
 }
