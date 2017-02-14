@@ -7,7 +7,7 @@ layer {
   }
   data_param {
     source: "/home/krishneel/digits/digits/jobs/20161115-230826-c442/train_db/features"
-    batch_size: 1
+    batch_size: 2
     backend: LMDB
   }
 }
@@ -20,7 +20,7 @@ layer {
   }
   data_param {
     source: "/home/krishneel/digits/digits/jobs/20161115-230826-c442/train_db/labels"
-    batch_size: 1
+    batch_size: 2
     backend: LMDB
   }
 }
@@ -33,7 +33,7 @@ layer {
   }
   data_param {
     source: "/home/krishneel/digits/digits/jobs/20161115-230826-c442/val_db/features"
-    batch_size: 1
+    batch_size: 2
     backend: LMDB
   }
 }
@@ -46,7 +46,7 @@ layer {
   }
   data_param {
     source: "/home/krishneel/digits/digits/jobs/20161115-230826-c442/val_db/labels"
-    batch_size: 1
+    batch_size: 2
     backend: LMDB
   }
 }

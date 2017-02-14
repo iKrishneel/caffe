@@ -359,12 +359,12 @@ void DetectNetTransformationLayer<Dtype>::Forward_gpu(
      
      std::cout << "PRINTING (DTL) " << i  << " " << "\n";
      int index = -1;
-     for (int k = 0; k < bottom[i]->channels(); k++) {
+     for (int k = 0; k < bottom[i]->num(); k++) {
         for (int y = 0; y < bottom[i]->height(); y++) {
            for (int x = 0; x < bottom[i]->width(); x++) {
               index = x + (y * bottom[i]->width()) +
                  (k * bottom[i]->width() * bottom[i]->height());
-              std::cout << top_data1[index]  << " ";
+              std::cout << top_data1[index]  << " " << index << "\n";
            }
            std::cout  << "\n";
         }
@@ -446,6 +446,17 @@ void DetectNetTransformationLayer<Dtype>::Forward_gpu(
   const vector<vector<BboxLabel> > list_list_bboxes = blobToLabels(*bottom[1]);
   for (size_t i = 0; i < bottom[1]->num(); i++) {
     const vector<BboxLabel>& list_bboxes = list_list_bboxes[i];
+
+    // std::cout << "PRINT IN GPU" << ""  << "\n";
+    // for (int k = 0; k < list_bboxes.size(); k++) {
+    //    std::cout << list_bboxes[i].bbox.x << " "
+    //              << list_bboxes[i].bbox.y << " "
+    //              << list_bboxes[i].bbox.width << " "
+    //              << list_bboxes[i].bbox.height << " "
+    //              << "\n";
+    // }
+    // std::cout << "END"  << "\n";
+    
     Dtype* output_label = &top[1]->mutable_cpu_data()[
       top[1]->offset(i, 0, 0, 0)
       ];
